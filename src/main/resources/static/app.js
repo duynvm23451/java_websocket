@@ -1,11 +1,7 @@
-const url = "ws://192.168.1.129:8080/chat"
+const websocketUrl = "/chat"
 const topic = "/topic/greetings"
 const app = "/app/hello"
-const client = new StompJs.Client(
-    {
-        brokerURL: url
-    }
-);
+var client = null;
 
 var buttonConnect;
 var buttonDisConnect;
@@ -15,28 +11,30 @@ var greetings;
 var formInput;
 var nameInput;
 
-client.onConnect = (frame) => {
-    setConnected(true);
-    console.log("Connected: " + frame)
-    client.subscribe(topic, (greeting) => {
-        console.log(greeting)
-        showGreeting(JSON.parse(greeting.body).content)
+function connect() {
+    const sock = new SockJS(websocketUrl);
+    client = Stomp.over(sock);
+    client.connect({}, () => {
+        setConnected(true);
+        client.subscribe(topic, payload => {
+            showMessage(JSON.parse(payload.body).content)
+        })
     })
+    console.log("Connected Duy");
 }
 
-client.onWebSocketError = (error) => {
-    console.error("Error with websocket", error)
+function disconnect() {
+    if (client !== null) {
+        client.disconnect();
+        setConnected(false);
+        console.log("Disconnected");
+    }
 }
-
-client.onStompError = (frame) => {
-    console.error("Broker reported error: " + frame.headers['message'])
-    console.error("Additional details: " + frame.body)
-}
-
 
 function setConnected(connected) {
     buttonConnect.disable = connected;
     buttonDisConnect.disabled = !connected;
+    buttonSend.disabled = !connected;
     if (connected) {
         conversationDisplay.style.display = "block";
     } else {
@@ -45,26 +43,13 @@ function setConnected(connected) {
     greetings.innerHTML = "";
 }
 
-function connect() {
-    client.activate();
-    console.log("Connected");
-}
-
-function disConnect() {
-    client.deactivate();
-    setConnected(false);
-    console.log("Disconnected");
-}
-
-function sendName() {
-    client.publish({
-        destination: app,
-        body: JSON.stringify({'name': nameInput.value})
-    });
-}
-
-function showGreeting(message) {
+function showMessage(message) {
     greetings.innerHTML += "<tr><td>" + message + "</td></tr>"
+}
+
+function sendMessage() {
+    let message = nameInput.value;
+    client.send(app, {}, JSON.stringify({"name": message}))
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -80,11 +65,11 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
     })
     buttonDisConnect.addEventListener("click", (e) => {
-        disConnect();
+        disconnect();
         e.preventDefault();
     })
     buttonSend.addEventListener("click", (e) => {
-        sendName();
+        sendMessage();
         e.preventDefault()
     })
     formInput.addEventListener("submit", (e) => e.preventDefault());

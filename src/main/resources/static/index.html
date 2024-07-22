@@ -3,14 +3,15 @@
 <head>
     <title>Spring Boot Tutorial - WebSocket</title>
     <link href="./main.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script src="./app.js"></script>
 </head>
 <body>
 <div>
     <div>
-        <h1>Spring Boot Tutorial.</h1>
-        <h2>Websockets.</h2>
+        <h1>Duy'Room</h1>
+        <h2></h2>
         <div class="row">
             <form id="form">
                 <div class="row">
@@ -24,7 +25,7 @@
         <div class="row">
             <form>
                 <div>
-                    <label class="row" for="name">What is your name?</label>
+                    <label class="row" for="name">Type your message</label>
                     <input type="text" id="name" placeholder="Your name here...">
                     <button id="send" type="submit">Send</button>
                 </div>
